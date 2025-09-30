@@ -31,17 +31,12 @@ jobs:
         
       - name: Prepare WebGL build for deployment
         run: |
-          # Create a temporary directory for deployment
           mkdir -p deploy
-          # Copy the main index.html to the root
           cp index.html deploy/
-          # Copy all Build contents
-          cp -r Build/* deploy/
-          # Copy TemplateData if it exists
+          cp -r Build deploy/
           if [ -d "TemplateData" ]; then
             cp -r TemplateData deploy/
           fi
-          # Copy StreamingAssets if it exists
           if [ -d "StreamingAssets" ]; then
             cp -r StreamingAssets deploy/
           fi
