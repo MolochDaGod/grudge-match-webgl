@@ -91,12 +91,14 @@
             updateBannerVisibility();
         }
 
+        // Cache busting for file updates
+        var cacheBuster = "?v=" + Date.now();
         var buildUrl = "Build";
-        var loaderUrl = buildUrl + "/GRUDGE_MATCH.loader.js";
+        var loaderUrl = buildUrl + "/GRUDGE_MATCH.loader.js" + cacheBuster;
         var config = {
-            dataUrl: buildUrl + "/GRUDGE_MATCH.data",
-            frameworkUrl: buildUrl + "/GRUDGE_MATCH.framework.js", 
-            codeUrl: buildUrl + "/GRUDGE_MATCH.wasm",
+            dataUrl: buildUrl + "/GRUDGE_MATCH.data" + cacheBuster,
+            frameworkUrl: buildUrl + "/GRUDGE_MATCH.framework.js" + cacheBuster, 
+            codeUrl: buildUrl + "/GRUDGE_MATCH.wasm" + cacheBuster,
             streamingAssetsUrl: "StreamingAssets",
             companyName: "GrudgeStudio",
             productName: "GRUDGE MATCH",
