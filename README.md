@@ -4,7 +4,7 @@ A Unity WebGL game deployed on GitHub Pages.
 
 ## Play Now
 
-[Play GRUDGE MATCH](https://yourusername.github.io/grudge-match-webgl/)
+[Play GRUDGE MATCH](https://MolochDaGod.github.io/grudge-match-webgl/)
 
 ## About
 
