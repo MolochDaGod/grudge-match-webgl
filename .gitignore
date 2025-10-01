@@ -35,3 +35,11 @@ Thumbs.db
 *.pidb.meta
 *.pdb.meta
 *.mdb.meta
+
+# Node.js and Vite
+node_modules/
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
