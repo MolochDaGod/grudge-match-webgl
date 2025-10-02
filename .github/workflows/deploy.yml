@@ -2,9 +2,7 @@ name: Deploy Unity WebGL to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ master ]
   workflow_dispatch:
 
 permissions:
@@ -29,27 +27,33 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Build with Vite
-        run: npm run build
-        
-      - name: Copy Unity WebGL files to dist
+      - name: Prepare deployment directory
         run: |
-          cp -r Build dist/
+          mkdir -p dist
+          # Copy all root HTML files
+          cp *.html dist/ 2>/dev/null || echo "No HTML files in root"
+          cp *.js dist/ 2>/dev/null || echo "No JS files in root"
+          
+          # Copy Unity WebGL build files
+          if [ -d "Build" ]; then
+            cp -r Build dist/
+          fi
+          
+          # Copy template data and streaming assets
           if [ -d "TemplateData" ]; then
             cp -r TemplateData dist/
           fi
           if [ -d "StreamingAssets" ]; then
             cp -r StreamingAssets dist/
           fi
+          
+          # Copy assets folder if it exists
+          if [ -d "Assets" ]; then
+            cp -r Assets dist/
+          fi
+          
+          echo "Contents of dist directory:"
+          ls -la dist/
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
