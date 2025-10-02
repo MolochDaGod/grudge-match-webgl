@@ -1,14 +1,15 @@
 {
-  "name": "grudge-match-webgl",
-  "version": "1.7.3",
-  "description": "GRUDGE MATCH - Unity WebGL Game",
+  "name": "grudge-tower-4d-characters",
+  "version": "1.0.0",
+  "description": "Grudge Tower 4D Character Builder - Web Interface for Tower Defense Game",
   "main": "index.html",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "serve": "npx http-server -p 8000 -c-1",
-    "deploy": "gh-pages -d dist",
+    "dev": "npx http-server -p 3000 -c-1",
+    "build": "echo 'Static files ready for deployment'",
+    "start": "npx http-server -p 8080 -c-1",
+    "preview": "npx http-server -p 4173 -c-1",
+    "deploy": "vercel --prod",
+    "deploy:dev": "vercel",
     "test": "echo 'No tests specified'"
   },
   "repository": {
@@ -16,21 +17,25 @@
     "url": "git+https://github.com/MolochDaGod/grudge-match-webgl.git"
   },
   "keywords": [
-    "unity",
-    "webgl",
+    "4d-characters",
+    "tower-defense",
+    "blockchain",
+    "solana",
+    "gbux",
+    "character-builder",
+    "web3",
+    "nft",
     "game",
-    "javascript",
-    "github-pages"
+    "javascript"
   ],
   "author": "GrudgeStudio",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/MolochDaGod/grudge-match-webgl/issues"
   },
-  "homepage": "https://MolochDaGod.github.io/grudge-match-webgl/",
+  "homepage": "https://grudge-match-webgl.vercel.app",
   "devDependencies": {
-    "vite": "^5.0.0",
     "http-server": "^14.1.1",
-    "gh-pages": "^6.0.0"
+    "vercel": "^32.0.0"
   }
 }

@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grudge Tower - 4D Character Builder</title>
+    <style>
+        :root {
+            --primary-color: #2c1810;
+            --secondary-color: #8b4513;
+            --accent-color: #ffd700;
+            --background-dark: #1a1a1a;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--background-dark) 0%, var(--primary-color) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 2rem;
+            border-bottom: 3px solid var(--accent-color);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            background: linear-gradient(45deg, var(--accent-color), #ffed4a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .wallet-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .gbux-balance {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .connect-wallet-btn {
+            background: linear-gradient(45deg, var(--secondary-color), #a0522d);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-light);
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .connect-wallet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 69, 19, 0.4);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .sidebar h3 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .character-viewer {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .character-display {
+            width: 300px;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(139, 69, 19, 0.1));
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .character-model {
+            width: 80%;
+            height: 80%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .character-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .equipment-slot {
+            background: rgba(139, 69, 19, 0.3);
+            border: 2px dashed rgba(255, 215, 0, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .equipment-slot:hover {
+            background: rgba(139, 69, 19, 0.5);
+            border-color: var(--accent-color);
+        }
+
+        .equipment-slot.equipped {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid var(--accent-color);
+        }
+
+        .item-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-title {
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .item-card {
+            background: rgba(139, 69, 19, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .item-card:hover {
+            background: rgba(139, 69, 19, 0.6);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .item-card.owned {
+            border-color: var(--success-color);
+            background: rgba(40, 167, 69, 0.2);
+        }
+
+        .item-name {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            color: var(--text-light);
+        }
+
+        .item-price {
+            font-size: 0.7rem;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .gbux-icon {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, var(--secondary-color), #a0522d);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-light);
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 69, 19, 0.4);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(45deg, var(--accent-color), #ffed4a);
+            color: var(--text-dark);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--background-dark), var(--primary-color));
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid var(--accent-color);
+        }
+
+        .close {
+            color: var(--text-light);
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: var(--accent-color);
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--text-light);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--accent-color);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            background: transparent;
+            border: none;
+            color: rgba(255, 215, 0, 0.6);
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🏰 GRUDGE TOWER</h1>
+                <span>4D Character Builder</span>
+            </div>
+            <div class="wallet-section">
+                <div class="gbux-balance" style="display: none;">
+                    <span class="gbux-icon">⚡</span>
+                    <span id="gbux-amount">0</span>
+                    <span>GBUX</span>
+                </div>
+                <button class="connect-wallet-btn" id="connect-wallet">Connect Wallet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar - Equipment -->
+        <div class="sidebar">
+            <h3>Equipment Slots</h3>
+            <div class="equipment-grid">
+                <div class="equipment-slot" data-slot="weapon" id="slot-weapon">
+                    <span>⚔️</span>
+                    <small>Weapon</small>
+                </div>
+                <div class="equipment-slot" data-slot="armor" id="slot-armor">
+                    <span>🛡️</span>
+                    <small>Armor</small>
+                </div>
+                <div class="equipment-slot" data-slot="helmet" id="slot-helmet">
+                    <span>⛑️</span>
+                    <small>Helmet</small>
+                </div>
+                <div class="equipment-slot" data-slot="accessory" id="slot-accessory">
+                    <span>💍</span>
+                    <small>Accessory</small>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <h3>Character Templates</h3>
+                <button class="action-btn" onclick="loadTemplate('warrior')" style="width: 100%; margin-bottom: 0.5rem;">🗡️ Warrior</button>
+                <button class="action-btn" onclick="loadTemplate('mage')" style="width: 100%; margin-bottom: 0.5rem;">🔮 Mage</button>
+                <button class="action-btn" onclick="loadTemplate('archer')" style="width: 100%;">🏹 Archer</button>
+            </div>
+        </div>
+
+        <!-- Center - Character Viewer -->
+        <div class="character-viewer">
+            <div class="character-display">
+                <div class="character-model" id="character-model">
+                    <div>
+                        <p>🏰 Your 4D Character</p>
+                        <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 1rem;">Customize your character with equipment from the item store. Each item affects your tower stats in Grudge Tower!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="character-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Health</div>
+                    <div class="stat-value" id="stat-health">100</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Attack</div>
+                    <div class="stat-value" id="stat-attack">25</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Defense</div>
+                    <div class="stat-value" id="stat-defense">15</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">DPS</div>
+                    <div class="stat-value" id="stat-dps">42.5</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Tower Value</div>
+                    <div class="stat-value" id="stat-tower-value">7.5</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Build Cost</div>
+                    <div class="stat-value" id="stat-build-cost">50</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="saveCharacter()">💾 Save Character</button>
+                <button class="action-btn" onclick="loadCharacter()">📂 Load Character</button>
+                <button class="action-btn primary" onclick="deployToTower()">🏰 Deploy to Tower</button>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Item Store -->
+        <div class="sidebar">
+            <h3>Item Store</h3>
+            
+            <div class="tab-container">
+                <button class="tab active" onclick="switchTab('weapons')">Weapons</button>
+                <button class="tab" onclick="switchTab('armor')">Armor</button>
+                <button class="tab" onclick="switchTab('accessories')">Accessories</button>
+            </div>
+
+            <div id="weapons-tab" class="tab-content active">
+                <div class="item-category">
+                    <div class="category-title">Melee Weapons</div>
+                    <div class="item-grid" id="melee-weapons-grid">
+                        <!-- Items will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="item-category">
+                    <div class="category-title">Ranged Weapons</div>
+                    <div class="item-grid" id="ranged-weapons-grid">
+                        <!-- Items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="armor-tab" class="tab-content">
+                <div class="item-category">
+                    <div class="category-title">Body Armor</div>
+                    <div class="item-grid" id="armor-grid">
+                        <!-- Items will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="item-category">
+                    <div class="category-title">Helmets</div>
+                    <div class="item-grid" id="helmet-grid">
+                        <!-- Items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="accessories-tab" class="tab-content">
+                <div class="item-category">
+                    <div class="category-title">Wings & Special</div>
+                    <div class="item-grid" id="accessories-grid">
+                        <!-- Items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div id="purchase-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 style="color: var(--accent-color); margin-bottom: 1rem;">Purchase Item</h2>
+            <div id="purchase-details">
+                <div style="text-align: center; margin: 2rem 0;">
+                    <div class="loading-spinner"></div>
+                    <p>Loading item details...</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="action-btn" onclick="closePurchaseModal()">Cancel</button>
+                <button class="action-btn primary" id="confirm-purchase">Purchase</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Load integration modules -->
+    <script src="gbux-wallet.js"></script>
+    <script src="catalog-integration.js"></script>
+    <script src="tower-integration.js"></script>
+    
+    <script>
+        // Game State
+        let gameState = {
+            connectedWallet: null,
+            gbuxBalance: 0,
+            character: {
+                name: "Unnamed Hero",
+                equipment: {
+                    weapon: null,
+                    armor: null,
+                    helmet: null,
+                    accessory: null
+                },
+                stats: {
+                    health: 100,
+                    attack: 25,
+                    defense: 15,
+                    dps: 42.5,
+                    towerValue: 7.5,
+                    buildCost: 50
+                }
+            },
+            ownedItems: [],
+            catalog: null
+        };
+
+        // Initialize integration modules
+        let catalogIntegration = null;
+        let walletIntegration = null;
+
+        // Sample item catalog - this would normally be loaded from your dapp-builder catalog.json
+        const sampleCatalog = {
+            weapons: {
+                melee: [
+                    { id: "sword_iron", name: "Iron Sword", price: 10, attack: 15, rarity: "common", icon: "⚔️" },
+                    { id: "sword_fire", name: "Fire Sword", price: 50, attack: 35, rarity: "epic", icon: "🔥⚔️" },
+                    { id: "axe_battle", name: "Battle Axe", price: 25, attack: 30, rarity: "rare", icon: "🪓" }
+                ],
+                ranged: [
+                    { id: "bow_wood", name: "Wooden Bow", price: 8, attack: 20, rarity: "common", icon: "🏹" },
+                    { id: "crossbow_steel", name: "Steel Crossbow", price: 40, attack: 45, rarity: "epic", icon: "🏹" }
+                ]
+            },
+            armor: [
+                { id: "armor_leather", name: "Leather Armor", price: 15, defense: 10, rarity: "common", icon: "🦺" },
+                { id: "armor_plate", name: "Plate Armor", price: 60, defense: 35, rarity: "legendary", icon: "🛡️" }
+            ],
+            accessories: [
+                { id: "wings_dragon", name: "Dragon Wings", price: 100, special: "flight", rarity: "legendary", icon: "🐉" },
+                { id: "ring_power", name: "Power Ring", price: 30, attack: 10, rarity: "rare", icon: "💍" }
+            ]
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeIntegrations();
+            initializeApp();
+            await populateItemStore();
+            updateCharacterDisplay();
+        });
+
+        async function initializeIntegrations() {
+            try {
+                // Initialize catalog integration
+                catalogIntegration = new CatalogIntegration();
+                await catalogIntegration.initialize();
+                
+                // Initialize wallet integration
+                walletIntegration = window.gbuxWallet || new GBUXWallet();
+                await walletIntegration.initialize();
+                
+                // Setup wallet event listeners
+                walletIntegration.addEventListener('connect', onWalletConnect);
+                walletIntegration.addEventListener('disconnect', onWalletDisconnect);
+                walletIntegration.addEventListener('balanceUpdate', onBalanceUpdate);
+                walletIntegration.addEventListener('transaction', onTransaction);
+                
+                console.log('Integration modules initialized successfully');
+            } catch (error) {
+                console.warn('Failed to initialize integration modules:', error);
+                // Continue with fallback data
+            }
+        }
+
+        function initializeApp() {
+            // Initialize event listeners
+            document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+            
+            // Equipment slot click handlers
+            document.querySelectorAll('.equipment-slot').forEach(slot => {
+                slot.addEventListener('click', () => openEquipmentDialog(slot.dataset.slot));
+            });
+
+            // Modal close handlers
+            document.querySelector('.close').addEventListener('click', closePurchaseModal);
+            window.addEventListener('click', (event) => {
+                if (event.target === document.getElementById('purchase-modal')) {
+                    closePurchaseModal();
+                }
+            });
+
+            // Try to load saved character data
+            loadSavedCharacter();
+        }
+
+        async function populateItemStore() {
+            let catalog = sampleCatalog; // Fallback
+            
+            // Use real catalog if available
+            if (catalogIntegration) {
+                try {
+                    catalog = catalogIntegration.getCatalog();
+                    gameState.catalog = catalog;
+                } catch (error) {
+                    console.warn('Failed to load catalog, using fallback:', error);
+                }
+            }
+            
+            // Populate weapons
+            populateGrid('melee-weapons-grid', catalog.weapons.melee, 'weapon');
+            populateGrid('ranged-weapons-grid', catalog.weapons.ranged, 'weapon');
+            
+            // Populate armor
+            populateGrid('armor-grid', catalog.armor, 'armor');
+            
+            // Populate accessories
+            populateGrid('accessories-grid', catalog.accessories, 'accessory');
+        }
+
+        function populateGrid(gridId, items, category) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+
+            grid.innerHTML = '';
+            items.forEach(item => {
+                const itemCard = createItemCard(item, category);
+                grid.appendChild(itemCard);
+            });
+        }
+
+        function createItemCard(item, category) {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.dataset.itemId = item.id;
+            card.dataset.category = category;
+
+            // Check if item is owned
+            const isOwned = gameState.ownedItems.includes(item.id);
+            if (isOwned) {
+                card.classList.add('owned');
+            }
+
+            card.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 0.25rem;">${item.icon}</div>
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">${item.price} ⚡</div>
+                <div style="font-size: 0.7rem; color: var(--${getRarityColor(item.rarity)});">${item.rarity.toUpperCase()}</div>
+            `;
+
+            card.addEventListener('click', () => {
+                if (isOwned) {
+                    equipItem(item, category);
+                } else {
+                    openPurchaseModal(item, category);
+                }
+            });
+
+            return card;
+        }
+
+        function getRarityColor(rarity) {
+            switch(rarity) {
+                case 'common': return 'text-light';
+                case 'rare': return 'primary-color';
+                case 'epic': return 'warning-color';
+                case 'legendary': return 'accent-color';
+                default: return 'text-light';
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        async function connectWallet() {
+            // Connect using wallet integration
+            const btn = document.getElementById('connect-wallet');
+            btn.textContent = 'Connecting...';
+            btn.disabled = true;
+            
+            try {
+                if (walletIntegration) {
+                    const result = await walletIntegration.connect();
+                    if (result.success) {
+                        gameState.connectedWallet = result.walletAddress;
+                        gameState.gbuxBalance = result.balance;
+                        
+                        // Load owned items for this wallet
+                        if (catalogIntegration) {
+                            gameState.ownedItems = await catalogIntegration.getUserOwnedItems(result.walletAddress);
+                            await populateItemStore(); // Refresh store with ownership data
+                        }
+                        
+                        updateWalletDisplay();
+                        showNotification('Wallet connected successfully!');
+                        
+                        btn.style.display = 'none';
+                        document.querySelector('.gbux-balance').style.display = 'flex';
+                        return;
+                    } else {
+                        showNotification('Failed to connect wallet: ' + (result.error || 'Unknown error'));
+                    }
+                } else {
+                    // Fallback for demo
+                    gameState.connectedWallet = 'DRJiootURSQeGhQXjLVpbnfDndpTG9DsPFo2oLaa5xpy';
+                    gameState.gbuxBalance = 250;
+                    
+                    updateWalletDisplay();
+                    showNotification('Demo wallet connected!');
+                    
+                    btn.style.display = 'none';
+                    document.querySelector('.gbux-balance').style.display = 'flex';
+                }
+            } catch (error) {
+                showNotification('Error connecting wallet: ' + error.message);
+                console.error('Wallet connection error:', error);
+            } finally {
+                btn.textContent = 'Connect Wallet';
+                btn.disabled = false;
+            }
+        }
+        
+        // Wallet event handlers
+        function onWalletConnect(data) {
+            gameState.connectedWallet = data.walletAddress;
+            gameState.gbuxBalance = data.balance;
+            updateWalletDisplay();
+        }
+        
+        function onWalletDisconnect() {
+            gameState.connectedWallet = null;
+            gameState.gbuxBalance = 0;
+            document.getElementById('connect-wallet').style.display = 'block';
+            document.querySelector('.gbux-balance').style.display = 'none';
+        }
+        
+        function onBalanceUpdate(balance) {
+            gameState.gbuxBalance = balance;
+            updateWalletDisplay();
+        }
+        
+        function onTransaction(data) {
+            if (data.type === 'purchase') {
+                showNotification(`Transaction complete: Purchased ${data.itemName}`);
+            }
+        }
+
+        function updateWalletDisplay() {
+            document.getElementById('gbux-amount').textContent = gameState.gbuxBalance;
+        }
+
+        function openPurchaseModal(item, category) {
+            if (!gameState.connectedWallet) {
+                showNotification('Please connect your wallet first!');
+                return;
+            }
+
+            const modal = document.getElementById('purchase-modal');
+            const details = document.getElementById('purchase-details');
+            
+            details.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">${item.icon}</div>
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">${item.name}</h3>
+                    <p style="margin-bottom: 1rem;">Price: <strong>${item.price} ⚡ GBUX</strong></p>
+                    <p style="margin-bottom: 1rem;">Rarity: <span style="color: var(--${getRarityColor(item.rarity)});">${item.rarity.toUpperCase()}</span></p>
+                    <div style="text-align: left; background: rgba(255,215,0,0.1); padding: 1rem; border-radius: 8px;">
+                        <p><strong>Stats:</strong></p>
+                        ${item.attack ? `<p>+${item.attack} Attack</p>` : ''}
+                        ${item.defense ? `<p>+${item.defense} Defense</p>` : ''}
+                        ${item.special ? `<p>Special: ${item.special}</p>` : ''}
+                    </div>
+                </div>
+            `;
+
+            const confirmBtn = document.getElementById('confirm-purchase');
+            confirmBtn.onclick = () => purchaseItem(item, category);
+            
+            modal.style.display = 'block';
+        }
+
+        function closePurchaseModal() {
+            document.getElementById('purchase-modal').style.display = 'none';
+        }
+
+        async function purchaseItem(item, category) {
+            try {
+                if (walletIntegration) {
+                    // Use real wallet transaction
+                    const result = await walletIntegration.purchaseItem(item.id, item.price, item.name);
+                    if (result.success) {
+                        gameState.ownedItems.push(item.id);
+                        
+                        // Record purchase in catalog integration
+                        if (catalogIntegration && gameState.connectedWallet) {
+                            await catalogIntegration.purchaseItem(gameState.connectedWallet, item.id, item.price);
+                        }
+                        
+                        closePurchaseModal();
+                        showNotification(`Successfully purchased ${item.name}!`);
+                        await populateItemStore(); // Refresh the store to show owned items
+                        
+                        // Auto-equip if slot is empty
+                        if (!gameState.character.equipment[category]) {
+                            equipItem(item, category);
+                        }
+                    } else {
+                        showNotification('Purchase failed: ' + (result.error || 'Unknown error'));
+                    }
+                } else {
+                    // Fallback to original logic
+                    if (gameState.gbuxBalance >= item.price) {
+                        gameState.gbuxBalance -= item.price;
+                        gameState.ownedItems.push(item.id);
+                        
+                        updateWalletDisplay();
+                        closePurchaseModal();
+                        showNotification(`Successfully purchased ${item.name}!`);
+                        await populateItemStore(); // Refresh the store to show owned items
+                        
+                        // Auto-equip if slot is empty
+                        if (!gameState.character.equipment[category]) {
+                            equipItem(item, category);
+                        }
+                    } else {
+                        showNotification('Insufficient GBUX balance!');
+                    }
+                }
+            } catch (error) {
+                console.error('Purchase error:', error);
+                showNotification('Purchase failed: ' + error.message);
+            }
+        }
+
+        function equipItem(item, category) {
+            gameState.character.equipment[category] = item;
+            updateCharacterDisplay();
+            updateEquipmentSlots();
+            showNotification(`Equipped ${item.name}!`);
+        }
+
+        function updateCharacterDisplay() {
+            // Update character model display
+            const model = document.getElementById('character-model');
+            const equipment = gameState.character.equipment;
+            
+            let displayText = '<div><p>🏰 Your 4D Character</p>';
+            if (equipment.weapon || equipment.armor || equipment.helmet || equipment.accessory) {
+                displayText += '<div style="margin-top: 1rem; font-size: 0.9rem;">';
+                if (equipment.weapon) displayText += `<p>${equipment.weapon.icon} ${equipment.weapon.name}</p>`;
+                if (equipment.armor) displayText += `<p>${equipment.armor.icon} ${equipment.armor.name}</p>`;
+                if (equipment.helmet) displayText += `<p>${equipment.helmet.icon} ${equipment.helmet.name}</p>`;
+                if (equipment.accessory) displayText += `<p>${equipment.accessory.icon} ${equipment.accessory.name}</p>`;
+                displayText += '</div>';
+            }
+            displayText += '</div>';
+            
+            model.innerHTML = displayText;
+
+            // Calculate and update stats
+            calculateStats();
+        }
+
+        function updateEquipmentSlots() {
+            const equipment = gameState.character.equipment;
+            
+            Object.keys(equipment).forEach(slot => {
+                const slotElement = document.getElementById(`slot-${slot}`);
+                if (equipment[slot]) {
+                    slotElement.classList.add('equipped');
+                    slotElement.innerHTML = `
+                        <span>${equipment[slot].icon}</span>
+                        <small>${equipment[slot].name}</small>
+                    `;
+                } else {
+                    slotElement.classList.remove('equipped');
+                    // Reset to default content
+                    const defaultContent = {
+                        weapon: '<span>⚔️</span><small>Weapon</small>',
+                        armor: '<span>🛡️</span><small>Armor</small>',
+                        helmet: '<span>⛑️</span><small>Helmet</small>',
+                        accessory: '<span>💍</span><small>Accessory</small>'
+                    };
+                    slotElement.innerHTML = defaultContent[slot];
+                }
+            });
+        }
+
+        function calculateStats() {
+            const baseStats = { health: 100, attack: 25, defense: 15 };
+            const equipment = gameState.character.equipment;
+            
+            let totalAttack = baseStats.attack;
+            let totalDefense = baseStats.defense;
+            let totalHealth = baseStats.health;
+            
+            // Add equipment bonuses
+            Object.values(equipment).forEach(item => {
+                if (item) {
+                    totalAttack += item.attack || 0;
+                    totalDefense += item.defense || 0;
+                }
+            });
+            
+            // Calculate derived stats
+            const dps = totalAttack * 1.7; // Sample formula
+            const towerValue = (totalAttack + totalDefense + totalHealth/10) * 0.15;
+            const buildCost = Math.max(30, Math.floor(towerValue * 6));
+            
+            // Update display
+            gameState.character.stats = {
+                health: totalHealth,
+                attack: totalAttack,
+                defense: totalDefense,
+                dps: dps.toFixed(1),
+                towerValue: towerValue.toFixed(1),
+                buildCost: buildCost
+            };
+            
+            // Update stat displays
+            document.getElementById('stat-health').textContent = totalHealth;
+            document.getElementById('stat-attack').textContent = totalAttack;
+            document.getElementById('stat-defense').textContent = totalDefense;
+            document.getElementById('stat-dps').textContent = dps.toFixed(1);
+            document.getElementById('stat-tower-value').textContent = towerValue.toFixed(1);
+            document.getElementById('stat-build-cost').textContent = buildCost;
+        }
+
+        function loadTemplate(templateName) {
+            const templates = {
+                warrior: {
+                    weapon: sampleCatalog.weapons.melee.find(w => w.id === 'sword_iron'),
+                    armor: sampleCatalog.armor.find(a => a.id === 'armor_leather')
+                },
+                mage: {
+                    weapon: sampleCatalog.weapons.melee.find(w => w.id === 'sword_fire'),
+                    accessory: sampleCatalog.accessories.find(a => a.id === 'ring_power')
+                },
+                archer: {
+                    weapon: sampleCatalog.weapons.ranged.find(w => w.id === 'bow_wood'),
+                    armor: sampleCatalog.armor.find(a => a.id === 'armor_leather')
+                }
+            };
+            
+            const template = templates[templateName];
+            if (template) {
+                // Check if player owns all template items
+                const canLoad = Object.values(template).every(item => 
+                    item && gameState.ownedItems.includes(item.id)
+                );
+                
+                if (canLoad) {
+                    gameState.character.equipment = { ...gameState.character.equipment, ...template };
+                    updateCharacterDisplay();
+                    updateEquipmentSlots();
+                    showNotification(`Loaded ${templateName} template!`);
+                } else {
+                    showNotification('You don\'t own all items in this template!');
+                }
+            }
+        }
+
+        function saveCharacter() {
+            localStorage.setItem('grudgeTowerCharacter', JSON.stringify(gameState.character));
+            showNotification('Character saved successfully!');
+        }
+
+        function loadCharacter() {
+            const saved = localStorage.getItem('grudgeTowerCharacter');
+            if (saved) {
+                gameState.character = JSON.parse(saved);
+                updateCharacterDisplay();
+                updateEquipmentSlots();
+                showNotification('Character loaded successfully!');
+            } else {
+                showNotification('No saved character found!');
+            }
+        }
+
+        function loadSavedCharacter() {
+            const saved = localStorage.getItem('grudgeTowerCharacter');
+            if (saved) {
+                gameState.character = JSON.parse(saved);
+                updateCharacterDisplay();
+                updateEquipmentSlots();
+            }
+        }
+
+        function deployToTower() {
+            try {
+                // Convert to tower using integration
+                const towerIntegration = new TowerIntegration();
+                const tower = towerIntegration.convertCharacterToTower(gameState.character);
+                
+                // Save for the game to access
+                const deploymentData = {
+                    tower,
+                    deploymentTime: new Date().toISOString()
+                };
+                localStorage.setItem('grudgeTowerDeployment', JSON.stringify(deploymentData));
+                
+                showNotification('Character deployed to Grudge Tower! Return to the main game to use your custom tower.');
+            } catch (error) {
+                console.error('Failed to deploy to tower:', error);
+                showNotification('Deployment failed: ' + error.message);
+            }
+        }
+
+        function openEquipmentDialog(slot) {
+            if (gameState.character.equipment[slot]) {
+                // Show unequip option
+                const confirmUnequip = confirm(`Unequip ${gameState.character.equipment[slot].name}?`);
+                if (confirmUnequip) {
+                    gameState.character.equipment[slot] = null;
+                    updateCharacterDisplay();
+                    updateEquipmentSlots();
+                    showNotification('Item unequipped!');
+                }
+            } else {
+                showNotification(`No ${slot} equipped. Purchase items from the store to equip them!`);
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize sample owned items for demo
+        gameState.ownedItems = ['sword_iron', 'bow_wood', 'armor_leather'];
+        
+        // Auto-connect wallet for demo (remove in production)
+        setTimeout(() => {
+            if (!gameState.connectedWallet) {
+                document.getElementById('connect-wallet').click();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
