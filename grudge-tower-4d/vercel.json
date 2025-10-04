@@ -1,0 +1,8 @@
+{
+  "env": {
+    "NEXT_PUBLIC_SOLANA_NETWORK": "mainnet-beta",
+    "NEXT_PUBLIC_SOLANA_RPC_URL": "https://api.mainnet-beta.solana.com",
+    "NEXT_PUBLIC_GBUX_TOKEN_MINT": "55TpSoMNxbfsNJ9U1dQoo9H3dRtDmjBZVMcKqvU2nray",
+    "NEXT_PUBLIC_TREASURY_WALLET": "DRJiootURSQeGhQXjLVpbnfDndpTG9DsPFo2oLaa5xpy"
+  }
+}
