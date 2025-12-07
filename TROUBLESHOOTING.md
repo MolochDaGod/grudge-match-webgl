@@ -1,15 +1,32 @@
-# GRUDGE MATCH - Troubleshooting Guide
+# 🔧 GRUDGE MATCH - Enhanced Troubleshooting Guide
+
+## 🆕 New Features & Error Handling
+
+The enhanced version includes:
+- **🛡️ Advanced Error Recovery**: Automatic detection and recovery from common issues
+- **📊 Performance Monitoring**: Real-time diagnostics (Press Ctrl+M)
+- **🔍 Smart Compatibility Checks**: Automatic browser and device validation
+- **❓ Interactive Help System**: Press `?` for in-game help and controls
+
+## 🚑 Automatic Error Recovery
+
+The game now automatically handles:
+- WebGL context loss with auto-recovery
+- Memory issues with cleanup and optimization
+- Network errors with retry mechanisms
+- Browser extension conflicts with isolation
 
 ## 🔧 Common Issues and Solutions
 
-### 1. Ethereum/Wallet Extension Conflicts
+### 1. 👾 Enhanced Wallet Extension Protection
 **Error**: `Cannot redefine property: ethereum`
-**Solution**: The updated index.html now includes protection against wallet extension conflicts.
+**✅ Auto-Fixed**: The game now automatically prevents wallet extension conflicts.
 
-**Additional Steps**:
-- Disable browser wallet extensions (MetaMask, etc.) while playing
+**Manual Steps** (if issues persist):
+- Press `?` to open game info and check compatibility
 - Use incognito/private browsing mode
-- Clear browser cache and cookies
+- Disable wallet extensions temporarily
+- Check browser console for detailed error reports
 
 ### 2. File Loading Errors (404)
 **Error**: `Failed to load resource: the server responded with a status of 404`
@@ -22,19 +39,33 @@
 - ✅ `Build/GRUDGE_MATCH.wasm` exists
 - ✅ `Build/GRUDGE_MATCH.jpg` exists
 
-### 3. Loading Performance Issues
-**Solutions**:
-- Use Chrome or Firefox for best performance
-- Close other tabs to free up memory
-- Ensure good internet connection for initial load
-- Wait for full download (80MB+ total)
+### 3. 📊 Enhanced Performance Monitoring
+**New Features**:
+- **Real-time Monitor**: Press `Ctrl+M` to toggle performance overlay
+- **Smart Device Detection**: Automatic optimization for your device
+- **Memory Management**: Automatic cleanup and garbage collection
+- **Loading Analytics**: Detailed progress tracking with time estimates
 
-### 4. Mobile Compatibility
-**Note**: WebGL games have limited mobile support
-**Recommendations**:
-- Use desktop browser for best experience
-- On mobile: use landscape orientation
-- Reduce browser zoom if UI appears cut off
+**Performance Solutions**:
+- Press `?` to check system information and recommendations
+- Use Performance Monitor (Ctrl+M) to identify bottlenecks
+- Game automatically reduces quality on low-memory devices
+- Enhanced loading with compression detection
+- Mobile devices get optimized settings automatically
+
+### 4. 📱 Enhanced Mobile Experience
+**New Mobile Features**:
+- **Smart Orientation**: Automatic landscape detection and optimization
+- **Responsive UI**: Perfect scaling across all screen sizes
+- **Touch Optimized**: Improved touch controls and gesture handling
+- **Performance Scaling**: Automatic quality reduction for mobile devices
+
+**Mobile Recommendations**:
+- Game automatically optimizes for your device
+- Landscape orientation recommended for tablets
+- Performance warnings shown for low-memory devices
+- Fullscreen mode available in landscape (tablets)
+- Press `?` for mobile-specific tips and controls
 
 ### 5. GitHub Pages Deployment Issues
 **Common Problems**:
@@ -42,11 +73,41 @@
 - 404 on GitHub Pages: Ensure repository settings have Pages enabled
 - Files not updating: Clear browser cache (Ctrl+F5)
 
-### 6. Local Testing
-If you need to test locally:
+### 6. 🔧 Advanced Debugging Features
+
+**New Developer Tools**:
+- **Error Export**: `window.ErrorReporting.export()` - Download detailed error log
+- **Compatibility Check**: `window.GameCompatibility.recheck()` - Re-run compatibility tests
+- **Performance Stats**: Available in browser console during gameplay
+- **Memory Cleanup**: `window.ErrorReporting.clear()` - Clear error history
+
+**Debug Commands** (Browser Console):
+```javascript
+// Check game compatibility
+window.GameCompatibility.results
+
+// View error history
+window.ErrorReporting.getErrors()
+
+// Export error report
+window.ErrorReporting.export()
+
+// Access game controls
+window.GameControls.fullscreen()
+window.GameControls.performance()
+```
+
+### 7. 🧪 Local Testing & Development
+For developers testing locally:
 ```bash
-# Navigate to your build directory
-cd "c:\Users\nugye\Desktop\connectwebgl (1)\grudge-match-webgl"
+# Modern development setup
+npm install
+npm run dev        # Development server with hot reload
+npm run build      # Production build
+npm run preview    # Preview production build
+
+# Legacy method
+cd /path/to/grudge-match-webgl
 
 # Start local server (choose one):
 python -m http.server 8000

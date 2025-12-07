@@ -21,6 +21,7 @@
     
     <!-- WebGL Compatibility Script -->
     <script src="webgl-compatibility.js"></script>
+    <script src="error-handler.js"></script>
 </head>
 <body>
     <div id="unity-container" class="unity-desktop">
@@ -34,8 +35,39 @@
         <div id="unity-warning"></div>
         <div id="unity-footer">
             <div id="unity-webgl-logo"></div>
+            <div id="unity-help-button" onclick="toggleGameInfo()" title="Game Info & Controls">❓</div>
             <div id="unity-fullscreen-button"></div>
             <div id="unity-build-title">GRUDGE MATCH</div>
+        </div>
+        
+        <!-- Enhanced Game Info Overlay -->
+        <div id="game-info-overlay" style="display: none;">
+            <div class="game-info-content">
+                <h2>🎮 GRUDGE MATCH</h2>
+                <div class="game-version">Version 1.7.3 by GrudgeStudio</div>
+                
+                <div class="control-section">
+                    <h3>🎮 Controls & Features</h3>
+                    <div class="control-item"><kbd>F11</kbd> - Toggle Fullscreen</div>
+                    <div class="control-item"><kbd>Escape</kbd> - Exit Fullscreen</div>
+                    <div class="control-item"><kbd>Ctrl + R</kbd> - Restart Game</div>
+                    <div class="control-item"><kbd>Ctrl + M</kbd> - Performance Monitor</div>
+                    <div class="control-item"><kbd>?</kbd> - Toggle This Help</div>
+                </div>
+                
+                <div class="system-info">
+                    <h3>📊 System Information</h3>
+                    <div id="browser-info">Loading...</div>
+                    <div id="performance-info">Loading...</div>
+                </div>
+                
+                <div class="game-actions">
+                    <button onclick="GameControls.fullscreen()" class="action-btn">📺 Fullscreen</button>
+                    <button onclick="GameControls.performance()" class="action-btn">📊 Performance</button>
+                    <button onclick="GameControls.restart()" class="action-btn">🔄 Restart</button>
+                    <button onclick="toggleGameInfo()" class="action-btn close-btn">✖ Close</button>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -91,10 +123,13 @@
             updateBannerVisibility();
         }
 
-        // Cache busting for file updates
-        var cacheBuster = "?v=" + Date.now();
+        // Cache busting for file updates with version
+        var gameVersion = "1.7.3";
+        var cacheBuster = "?v=" + gameVersion;
         var buildUrl = "Build";
         var loaderUrl = buildUrl + "/GRUDGE_MATCH.loader.js" + cacheBuster;
+        
+        // Enhanced loading configuration
         var config = {
             dataUrl: buildUrl + "/GRUDGE_MATCH.data" + cacheBuster,
             frameworkUrl: buildUrl + "/GRUDGE_MATCH.framework.js" + cacheBuster, 
@@ -102,58 +137,398 @@
             streamingAssetsUrl: "StreamingAssets",
             companyName: "GrudgeStudio",
             productName: "GRUDGE MATCH",
-            productVersion: "1.7.3",
+            productVersion: gameVersion,
             showBanner: unityShowBanner,
+            // Memory and performance optimization
+            memorySize: 512,
+            // Enable compression detection
+            compressionFormat: "gzip",
+            // Threading support for better performance
+            matchWebGLToCanvasSize: false
         };
 
-        // Mobile device detection and optimization
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            // Mobile device style: fill the whole browser client area with the game canvas
+        // Enhanced mobile device detection and optimization
+        var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        var isTablet = /iPad/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isLandscape = window.innerWidth > window.innerHeight;
+        
+        if (isMobile || isTablet) {
+            // Enhanced mobile viewport configuration
             var meta = document.createElement('meta');
             meta.name = 'viewport';
-            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, shrink-to-fit=yes';
+            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=yes, viewport-fit=cover';
             document.getElementsByTagName('head')[0].appendChild(meta);
+            
+            // Prevent zoom on input focus
+            document.addEventListener('touchstart', function() {}, {passive: true});
+            
             container.className = "unity-mobile";
             canvas.className = "unity-mobile";
 
-            // Lower canvas resolution on mobile devices to gain performance
-            config.devicePixelRatio = 1;
-
-            unityShowBanner('WebGL builds are not fully supported on mobile devices. For best experience, use a desktop browser.');
+            // Optimize for mobile performance
+            config.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+            
+            // Mobile-specific configuration
+            config.memorySize = 256; // Reduced memory for mobile
+            config.matchWebGLToCanvasSize = false;
+            
+            // Show appropriate mobile message
+            if (isTablet) {
+                unityShowBanner('Tablet detected. For best performance, consider using landscape orientation.', 'warning');
+            } else {
+                unityShowBanner('Mobile device detected. Performance may be limited. Desktop recommended for optimal experience.', 'warning');
+            }
+            
+            // Handle orientation changes
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    if (window.unityInstance) {
+                        try {
+                            // Notify Unity about orientation change
+                            var newOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+                            console.log('Orientation changed to:', newOrientation);
+                        } catch (e) {
+                            console.log('Orientation change handled');
+                        }
+                    }
+                }, 500);
+            });
+            
         } else {
-            // Desktop style: Letterbox the game in the center of the browser window
+            // Desktop configuration
             canvas.style.width = "480px";
             canvas.style.height = "800px";
+            
+            // Enable higher quality settings for desktop
+            config.devicePixelRatio = window.devicePixelRatio || 1;
+            config.memorySize = 512;
         }
+        
+        // Prevent context menu on long press (mobile)
+        canvas.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Handle window resize for responsive design
+        window.addEventListener('resize', function() {
+            if (!isMobile && !isTablet) {
+                // Adjust desktop canvas if needed
+                var maxWidth = Math.min(window.innerWidth * 0.9, 480);
+                var maxHeight = Math.min(window.innerHeight * 0.9, 800);
+                var aspectRatio = 480 / 800;
+                
+                if (maxWidth / maxHeight > aspectRatio) {
+                    canvas.style.width = (maxHeight * aspectRatio) + "px";
+                    canvas.style.height = maxHeight + "px";
+                } else {
+                    canvas.style.width = maxWidth + "px";
+                    canvas.style.height = (maxWidth / aspectRatio) + "px";
+                }
+            }
+        });
 
         loadingBar.style.display = "block";
 
+        // Enhanced loading with progress tracking
+        var loadingStartTime = Date.now();
+        var loadingStage = "Preparing...";
+        
+        function updateLoadingText(stage, progress) {
+            var elapsed = ((Date.now() - loadingStartTime) / 1000).toFixed(1);
+            var progressElement = document.querySelector('#unity-progress-bar-full');
+            if (progressElement) {
+                progressElement.title = `${stage} - ${(progress * 100).toFixed(1)}% (${elapsed}s)`;
+            }
+            console.log(`[${elapsed}s] ${stage}: ${(progress * 100).toFixed(1)}%`);
+        }
+        
         var script = document.createElement("script");
         script.src = loaderUrl;
         script.onload = () => {
             console.log("Unity loader script loaded successfully");
+            loadingStage = "Loading game assets...";
+            
             createUnityInstance(canvas, config, (progress) => {
                 progressBarFull.style.width = 100 * progress + "%";
-                console.log("Loading progress: " + (progress * 100).toFixed(1) + "%");
+                
+                // Determine loading stage based on progress
+                if (progress < 0.3) {
+                    loadingStage = "Downloading framework...";
+                } else if (progress < 0.7) {
+                    loadingStage = "Loading game data...";
+                } else if (progress < 0.95) {
+                    loadingStage = "Initializing game...";
+                } else {
+                    loadingStage = "Starting game...";
+                }
+                
+                updateLoadingText(loadingStage, progress);
             }).then((unityInstance) => {
                 loadingBar.style.display = "none";
-                console.log("Unity instance created successfully");
+                var totalTime = ((Date.now() - loadingStartTime) / 1000).toFixed(1);
+                console.log(`Unity instance created successfully in ${totalTime}s`);
+                
+                // Enhanced fullscreen functionality
                 fullscreenButton.onclick = () => {
-                    unityInstance.SetFullscreen(1);
+                    try {
+                        unityInstance.SetFullscreen(1);
+                    } catch (e) {
+                        console.log('Fullscreen not supported or failed:', e);
+                        unityShowBanner('Fullscreen not supported on this device', 'warning');
+                    }
                 };
-                // Store unity instance globally for cleanup
+                
+                // Store unity instance globally for cleanup and debugging
                 window.unityInstance = unityInstance;
+                
+                // Initialize game features
+                initializeGameFeatures(unityInstance);
+                
+                // Add quality settings for mobile optimization
+                if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                    setTimeout(() => {
+                        try {
+                            unityInstance.SendMessage('Main Camera', 'SetQualityLevel', 0);
+                        } catch (e) {
+                            console.log('Could not set mobile quality level:', e);
+                        }
+                    }, 2000);
+                }
+                
             }).catch((message) => {
                 console.error('Unity loading error:', message);
-                unityShowBanner('Error loading game: ' + message, 'error');
+                var errorMsg = 'Error loading game: ' + message;
+                if (message.includes('wasm')) {
+                    errorMsg += '\nYour browser may not support WebAssembly. Try updating your browser.';
+                }
+                unityShowBanner(errorMsg, 'error');
             });
         };
+        
         script.onerror = (error) => {
             console.error('Failed to load Unity loader script:', error);
             console.error('Loader URL:', loaderUrl);
-            unityShowBanner('Error loading Unity loader script. Please check that all build files are present.', 'error');
+            unityShowBanner('Error loading Unity loader script. Please check your internet connection and try refreshing.', 'error');
         };
+        
         document.body.appendChild(script);
+        
+        // Enhanced game features and controls
+        function initializeGameFeatures(unityInstance) {
+            console.log('🎮 Initializing enhanced game features...');
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(event) {
+                switch(event.key) {
+                    case 'F11':
+                        event.preventDefault();
+                        toggleFullscreen();
+                        break;
+                    case 'Escape':
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                        }
+                        break;
+                    case 'r':
+                    case 'R':
+                        if (event.ctrlKey) {
+                            event.preventDefault();
+                            location.reload();
+                        }
+                        break;
+                    case 'm':
+                    case 'M':
+                        if (event.ctrlKey) {
+                            event.preventDefault();
+                            togglePerformanceMonitor();
+                        }
+                        break;
+                }
+            });
+            
+            // Enhanced fullscreen functionality
+            function toggleFullscreen() {
+                try {
+                    if (!document.fullscreenElement) {
+                        if (canvas.requestFullscreen) {
+                            canvas.requestFullscreen();
+                        } else if (canvas.webkitRequestFullscreen) {
+                            canvas.webkitRequestFullscreen();
+                        } else if (canvas.msRequestFullscreen) {
+                            canvas.msRequestFullscreen();
+                        }
+                        unityInstance.SetFullscreen(1);
+                    } else {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                        }
+                        unityInstance.SetFullscreen(0);
+                    }
+                } catch (e) {
+                    console.log('Fullscreen toggle failed:', e);
+                    unityShowBanner('Fullscreen not supported on this browser', 'warning');
+                }
+            }
+            
+            // Performance monitoring
+            let performanceMonitor = null;
+            function togglePerformanceMonitor() {
+                if (performanceMonitor) {
+                    document.body.removeChild(performanceMonitor);
+                    performanceMonitor = null;
+                } else {
+                    createPerformanceMonitor();
+                }
+            }
+            
+            function createPerformanceMonitor() {
+                performanceMonitor = document.createElement('div');
+                performanceMonitor.id = 'performance-monitor';
+                performanceMonitor.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    background: rgba(0, 0, 0, 0.8);
+                    color: #00ff00;
+                    padding: 10px;
+                    border-radius: 5px;
+                    font-family: monospace;
+                    font-size: 12px;
+                    z-index: 9999;
+                    min-width: 200px;
+                `;
+                
+                document.body.appendChild(performanceMonitor);
+                
+                function updatePerformanceStats() {
+                    if (!performanceMonitor) return;
+                    
+                    const now = performance.now();
+                    const memInfo = performance.memory || {};
+                    const connection = navigator.connection || {};
+                    
+                    performanceMonitor.innerHTML = `
+                        <div><strong>PERFORMANCE MONITOR</strong></div>
+                        <div>FPS: ${Math.round(1000 / (now - (window.lastFrameTime || now)))}</div>
+                        <div>Memory: ${Math.round((memInfo.usedJSHeapSize || 0) / 1048576)}MB</div>
+                        <div>Canvas: ${canvas.width}x${canvas.height}</div>
+                        <div>Connection: ${connection.effectiveType || 'unknown'}</div>
+                        <div>Downlink: ${connection.downlink || 'unknown'}Mbps</div>
+                        <div><small>Ctrl+M to toggle</small></div>
+                    `;
+                    
+                    window.lastFrameTime = now;
+                }
+                
+                setInterval(updatePerformanceStats, 1000);
+            }
+            
+            // Game state management
+            window.GameControls = {
+                fullscreen: toggleFullscreen,
+                performance: togglePerformanceMonitor,
+                restart: () => location.reload(),
+                instance: unityInstance
+            };
+            
+            // Focus management for better input handling
+            canvas.addEventListener('click', function() {
+                canvas.focus();
+            });
+            
+            // Prevent common browser shortcuts that might interfere
+            document.addEventListener('keydown', function(event) {
+                // Prevent F5 refresh during gameplay
+                if (event.key === 'F5' && document.activeElement === canvas) {
+                    event.preventDefault();
+                }
+                // Prevent space bar page scroll
+                if (event.key === ' ' && document.activeElement === canvas) {
+                    event.preventDefault();
+                }
+            });
+            
+            // Add help key shortcut
+            document.addEventListener('keydown', function(event) {
+                if (event.key === '?' || (event.key === '/' && event.shiftKey)) {
+                    event.preventDefault();
+                    toggleGameInfo();
+                }
+            });
+            
+            console.log('✅ Game features initialized successfully!');
+            console.log('📖 Controls: F11 (fullscreen), Ctrl+R (restart), Ctrl+M (performance), ? (help)');
+        }
+        
+        // Game info overlay functions
+        function toggleGameInfo() {
+            const overlay = document.getElementById('game-info-overlay');
+            if (overlay.style.display === 'none' || !overlay.style.display) {
+                showGameInfo();
+            } else {
+                hideGameInfo();
+            }
+        }
+        
+        function showGameInfo() {
+            const overlay = document.getElementById('game-info-overlay');
+            overlay.style.display = 'flex';
+            
+            // Update system information
+            updateSystemInfo();
+            
+            // Pause game if possible
+            if (window.unityInstance) {
+                try {
+                    window.unityInstance.SendMessage('GameManager', 'PauseGame', '');
+                } catch (e) {
+                    console.log('Could not pause game');
+                }
+            }
+        }
+        
+        function hideGameInfo() {
+            const overlay = document.getElementById('game-info-overlay');
+            overlay.style.display = 'none';
+            
+            // Resume game if possible
+            if (window.unityInstance) {
+                try {
+                    window.unityInstance.SendMessage('GameManager', 'ResumeGame', '');
+                } catch (e) {
+                    console.log('Could not resume game');
+                }
+            }
+        }
+        
+        function updateSystemInfo() {
+            const browserInfo = document.getElementById('browser-info');
+            const performanceInfo = document.getElementById('performance-info');
+            
+            if (browserInfo) {
+                const webgl = window.WebGLCompatibility ? window.WebGLCompatibility.checkWebGL() : { supported: 'Unknown' };
+                browserInfo.innerHTML = `
+                    <div><strong>Browser:</strong> ${navigator.userAgent.split(' ').pop()}</div>
+                    <div><strong>WebGL:</strong> ${webgl.supported ? '✅ Supported' : '❌ Not Supported'}</div>
+                    <div><strong>Platform:</strong> ${navigator.platform}</div>
+                `;
+            }
+            
+            if (performanceInfo) {
+                const memory = performance.memory || {};
+                const connection = navigator.connection || {};
+                performanceInfo.innerHTML = `
+                    <div><strong>Memory:</strong> ${Math.round((memory.usedJSHeapSize || 0) / 1048576)}MB used</div>
+                    <div><strong>Connection:</strong> ${connection.effectiveType || 'Unknown'}</div>
+                    <div><strong>Cores:</strong> ${navigator.hardwareConcurrency || 'Unknown'}</div>
+                `;
+            }
+        }
     </script>
 </body>
 </html>
