@@ -28,10 +28,14 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 480px;
-    height: 800px;
+    width: auto;
+    height: auto;
     max-width: 90vw;
     max-height: 90vh;
+    /* Ensure proper scaling */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Mobile layout */
@@ -51,6 +55,13 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     max-width: 100%;
     max-height: 100%;
+    /* Improve rendering quality */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+    /* Prevent blurry scaling */
+    transform-origin: center;
+    object-fit: contain;
 }
 
 .unity-mobile #unity-canvas {
