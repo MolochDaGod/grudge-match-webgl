@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite'
-import { copyFileSync, existsSync, mkdirSync } from 'fs'
-import { resolve } from 'path'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs'
+import { join } from 'path'
 
 export default defineConfig({
-  // Configure for GitHub Pages deployment
-  base: '/grudge-match-webgl/',
+  // Use root base path for Vercel deployment
+  base: '/',
   
   // Build configuration
   build: {
@@ -53,23 +53,20 @@ export default defineConfig({
     {
       name: 'copy-unity-assets',
       writeBundle() {
-        const fs = require('fs')
-        const path = require('path')
-        
-        // Copy Unity build files
+        // Copy Unity build files (using ESM fs imports from top of file)
         const copyDir = (src, dest) => {
-          if (!fs.existsSync(src)) return
-          if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true })
+          if (!existsSync(src)) return
+          if (!existsSync(dest)) mkdirSync(dest, { recursive: true })
           
-          const files = fs.readdirSync(src)
+          const files = readdirSync(src)
           files.forEach(file => {
-            const srcPath = path.join(src, file)
-            const destPath = path.join(dest, file)
+            const srcPath = join(src, file)
+            const destPath = join(dest, file)
             
-            if (fs.statSync(srcPath).isDirectory()) {
+            if (statSync(srcPath).isDirectory()) {
               copyDir(srcPath, destPath)
             } else {
-              fs.copyFileSync(srcPath, destPath)
+              copyFileSync(srcPath, destPath)
             }
           })
         }
@@ -80,10 +77,10 @@ export default defineConfig({
         copyDir('StreamingAssets', 'dist/StreamingAssets')
         
         // Copy root files
-        const rootFiles = ['webgl-compatibility.js']
+        const rootFiles = ['webgl-compatibility.js', 'error-handler.js']
         rootFiles.forEach(file => {
-          if (fs.existsSync(file)) {
-            fs.copyFileSync(file, `dist/${file}`)
+          if (existsSync(file)) {
+            copyFileSync(file, `dist/${file}`)
           }
         })
         
